@@ -22,6 +22,4 @@ export interface PomodoroState {
 
 export interface MessageBlock {
   event: PomodoroEvent;
-  state: PomodoroState;
-  config: PomodoroConfig;
 }

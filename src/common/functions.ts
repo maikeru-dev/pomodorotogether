@@ -12,10 +12,6 @@ export function formPomodoroState(currentTime: number, currentCycle: number) {
   };
 }
 
-export function formMessageBlock(
-  state: PomodoroState,
-  event: PomodoroEvent,
-  config: PomodoroConfig,
-) {
-  return { state: state, event: event, config: config };
+export function formMessageBlock(event: PomodoroEvent) {
+  return { event: event };
 }
