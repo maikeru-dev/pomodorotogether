@@ -1,0 +1,4 @@
+{
+  "verbose": true,
+  "ignore": [".gitignore", "dist/", "package.json", "./src/public/scripts/"]
+}
