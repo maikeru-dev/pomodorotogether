@@ -7,7 +7,7 @@ import {
   PomodoroConfig,
   PomodoroState,
   MessageBlock,
-} from "../common";
+} from "../common/interfaces";
 
 expressWs(app);
 
