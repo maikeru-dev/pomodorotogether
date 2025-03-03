@@ -10,25 +10,47 @@ import {
 } from "../common/functions";
 
 class PomoState {
-  currentEvent: PomodoroEvent;
-  PomoState(currentEvent: PomodoroEvent) {
-    this.currentEvent = currentEvent;
+  currentEvent: PomodoroEvent = PomodoroEvent.STOPPED;
+  listeners: Function[] = [];
+  constructor() {}
+
+  registerListener(handler: Function): void {
+    this.listeners.push(handler);
+  }
+  private broadcastUpdate(): void {
+    this.listeners.forEach(() => {
+      return this.currentEvent;
+    });
+  }
+
+  setCurrentEvent(newEvent: PomodoroEvent) {
+    this.currentEvent = newEvent;
+    this.broadcastUpdate();
   }
 }
 
-const socket = new WebSocket("ws://" + window.location.host + "/api/v1/");
+const currentState: PomoState = new PomoState();
+let socket: WebSocket;
 
-socket.addEventListener("open", (event) => {
-  console.log("Opened it!");
-  let msgBlock = newMsgBlock(PomodoroEvent.STOPPED);
+function addListeners(socket: WebSocket) {
+  socket.addEventListener("open", (event) => {
+    console.log("Opened it!");
+    let msgBlock = newMsgBlock(PomodoroEvent.STOPPED);
 
-  socket.send(JSON.stringify(msgBlock));
-});
-socket.addEventListener("close", (event) => {
-  console.log(event.reason);
-});
+    socket.send(JSON.stringify(msgBlock));
+  });
+  socket.addEventListener("close", (event) => {
+    console.log(event.reason);
+  });
 
-socket.addEventListener("message", (event) => {
-  let msgBlock: MessageBlock = JSON.parse(event.data);
-  currentEvent = msgBlock.event;
-});
+  socket.addEventListener("message", (event) => {
+    let msgBlock: MessageBlock = JSON.parse(event.data);
+    currentState.setCurrentEvent(msgBlock.event);
+  });
+}
+
+function init() {
+  socket = new WebSocket("ws://" + window.location.host + "/api/v1/");
+  addListeners(socket);
+}
+document.body.addEventListener("DOMContentLoaded", () => init());
