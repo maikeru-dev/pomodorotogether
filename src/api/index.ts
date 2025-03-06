@@ -14,8 +14,11 @@ import {
 
 expressWs(app);
 
+export const validCodes = new Set<String>();
+const passwordedClients: Map<String, Set<WebSocket>> = new Map();
 const router = express.Router();
 const clients = new Set<WebSocket>();
+// TODO: Convert to a map of clients and their states
 const mutex = new Mutex();
 
 router.ws("/", (ws, req) => {
