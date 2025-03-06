@@ -17,21 +17,50 @@ expressWs(app);
 export const validCodes = new Set<String>();
 const passwordedClients: Map<String, Set<WebSocket>> = new Map();
 const router = express.Router();
-const clients = new Set<WebSocket>();
-// TODO: Convert to a map of clients and their states
 const mutex = new Mutex();
 
 router.ws("/", (ws, req) => {
-  clients.add(ws);
+  let code: String = "";
   ws.on("open", () => {
     console.log("New client connected");
   });
   ws.on("message", (msg) => {
     let msgBlock = JSON.parse(msg.toString()) as MessageBlock;
-    console.log(msgBlock.event);
+    let clients;
+    if (code == "") {
+      code = msgBlock.code;
+      clients = passwordedClients.get(code);
+      if (clients != undefined) {
+        clients.add(ws);
+      } else {
+        clients = new Set([ws]);
+        passwordedClients.set(code, clients);
+      }
+    } else {
+      clients = passwordedClients.get(code);
+    }
+
+    if (code != msgBlock.code) {
+      console.error("Code mismatch: Have ", code, ", Got", msgBlock.code);
+      ws.close();
+    }
+
+    clients!.forEach((client) => {
+      if (client != ws) {
+        client.send(msg);
+      }
+    });
   });
   ws.on("close", () => {
-    clients.delete(ws);
+    if (code != "") {
+      let clients = passwordedClients.get(code);
+      if (clients != undefined) {
+        clients.delete(ws);
+        if (clients.size == 0) {
+          passwordedClients.delete(code);
+        }
+      }
+    }
   });
 });
 

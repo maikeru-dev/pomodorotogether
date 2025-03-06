@@ -7,10 +7,12 @@ import {
 } from "../common/interfaces.js";
 import * as functions from "../common/functions.js";
 
-const currentState: PomoState = new PomoState();
+let currentState: PomoState;
 let socket: WebSocket;
 
-function addListeners(socket: WebSocket) {
+function addListeners(socket: WebSocket, state: PomoState) {
+  let currentState: PomoState = state;
+
   socket.addEventListener("open", (event) => {
     console.log("Opened it!");
     let msgBlock = currentState.genMsgBlock();
@@ -24,6 +26,7 @@ function addListeners(socket: WebSocket) {
   socket.addEventListener("message", (event) => {
     let msgBlock: MessageBlock = JSON.parse(event.data);
     currentState.setCurrentEvent(msgBlock.event);
+    console.log("Recieved", msgBlock);
   });
 }
 
@@ -37,7 +40,11 @@ if (document.readyState !== "loading") {
 
 function init() {
   console.log("Running init!");
-  socket = new WebSocket("ws://" + window.location.host + "/api/v1/");
-  addListeners(socket);
+  let currentCode = window.location.pathname.slice(1);
+  currentState = new PomoState(currentCode);
+  if (currentCode != "") {
+    socket = new WebSocket("ws://" + window.location.host + "/api/v1/");
+    addListeners(socket, currentState);
+  }
 }
 document.body.addEventListener("DOMContentLoaded", () => init());

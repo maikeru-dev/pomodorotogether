@@ -22,12 +22,20 @@ export interface PomodoroState {
 
 export interface MessageBlock {
   event: PomodoroEvent;
+  code: String;
 }
 
 export class PomoState {
   currentEvent: PomodoroEvent = PomodoroEvent.STOPPED;
+  private static code: String;
   listeners: Function[] = [];
-  constructor() {}
+  constructor(code: String) {
+    PomoState.code = code;
+  }
+
+  getCode(): String {
+    return PomoState.code;
+  }
 
   registerListener(handler: Function): void {
     this.listeners.push(handler);
@@ -44,6 +52,6 @@ export class PomoState {
   }
 
   genMsgBlock(): MessageBlock {
-    return { event: this.currentEvent };
+    return { event: this.currentEvent, code: PomoState.code };
   }
 }
