@@ -4,7 +4,7 @@ export default {
   input: ["dist/client/index.js"],
   output: {
     sourcemap: true,
-    file: "public/scripts/bundle.js",
+    file: "public/assets/scripts/bundle.js",
     format: "esm",
   },
 
