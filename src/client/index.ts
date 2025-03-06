@@ -3,32 +3,9 @@ import {
   PomodoroEvent,
   PomodoroConfig,
   PomodoroState,
+  PomoState,
 } from "../common/interfaces.js";
 import * as functions from "../common/functions.js";
-
-class PomoState {
-  currentEvent: PomodoroEvent = PomodoroEvent.STOPPED;
-  listeners: Function[] = [];
-  constructor() {}
-
-  registerListener(handler: Function): void {
-    this.listeners.push(handler);
-  }
-  private broadcastUpdate(): void {
-    this.listeners.forEach(() => {
-      return this.currentEvent;
-    });
-  }
-
-  setCurrentEvent(newEvent: PomodoroEvent) {
-    this.currentEvent = newEvent;
-    this.broadcastUpdate();
-  }
-
-  genMsgBlock() {
-    return functions.formMessageBlock(this.currentEvent);
-  }
-}
 
 const currentState: PomoState = new PomoState();
 let socket: WebSocket;
@@ -37,8 +14,8 @@ function addListeners(socket: WebSocket) {
   socket.addEventListener("open", (event) => {
     console.log("Opened it!");
     let msgBlock = currentState.genMsgBlock();
-    console.log(JSON.stringify(msgBlock.toString()));
-    socket.send(JSON.stringify(msgBlock.toString()));
+    console.log(JSON.stringify(msgBlock));
+    socket.send(JSON.stringify(msgBlock));
   });
   socket.addEventListener("close", (event) => {
     console.log(event.reason);
@@ -50,7 +27,16 @@ function addListeners(socket: WebSocket) {
   });
 }
 
+if (document.readyState !== "loading") {
+  init();
+} else {
+  document.addEventListener("DOMContentLoaded", function () {
+    init();
+  });
+}
+
 function init() {
+  console.log("Running init!");
   socket = new WebSocket("ws://" + window.location.host + "/api/v1/");
   addListeners(socket);
 }

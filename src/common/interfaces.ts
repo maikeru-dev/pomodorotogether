@@ -23,3 +23,27 @@ export interface PomodoroState {
 export interface MessageBlock {
   event: PomodoroEvent;
 }
+
+export class PomoState {
+  currentEvent: PomodoroEvent = PomodoroEvent.STOPPED;
+  listeners: Function[] = [];
+  constructor() {}
+
+  registerListener(handler: Function): void {
+    this.listeners.push(handler);
+  }
+  private broadcastUpdate(): void {
+    this.listeners.forEach(() => {
+      return this.currentEvent;
+    });
+  }
+
+  setCurrentEvent(newEvent: PomodoroEvent) {
+    this.currentEvent = newEvent;
+    this.broadcastUpdate();
+  }
+
+  genMsgBlock(): MessageBlock {
+    return { event: this.currentEvent };
+  }
+}
