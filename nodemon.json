@@ -1,6 +1,6 @@
 {
   "verbose": true,
   "ignore": [".gitignore", "dist/", "src/public/scripts/"],
-  "ext": "json,css,ts,html",
-  "watch": ["./src/**/*"]
+  "ext": "json,ts,",
+  "watch": ["./src/**/*", "./src/*", "./src/**/**/*"]
 }

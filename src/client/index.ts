@@ -3,11 +3,8 @@ import {
   PomodoroEvent,
   PomodoroConfig,
   PomodoroState,
-} from "../common/interfaces";
-import {
-  formMessageBlock as newMsgBlock,
-  formPomodoroState,
-} from "../common/functions";
+} from "../common/interfaces.js";
+import * as functions from "../common/functions.js";
 
 class PomoState {
   currentEvent: PomodoroEvent = PomodoroEvent.STOPPED;
@@ -27,6 +24,10 @@ class PomoState {
     this.currentEvent = newEvent;
     this.broadcastUpdate();
   }
+
+  genMsgBlock() {
+    return functions.formMessageBlock(this.currentEvent);
+  }
 }
 
 const currentState: PomoState = new PomoState();
@@ -35,9 +36,9 @@ let socket: WebSocket;
 function addListeners(socket: WebSocket) {
   socket.addEventListener("open", (event) => {
     console.log("Opened it!");
-    let msgBlock = newMsgBlock(PomodoroEvent.STOPPED);
-
-    socket.send(JSON.stringify(msgBlock));
+    let msgBlock = currentState.genMsgBlock();
+    console.log(JSON.stringify(msgBlock.toString()));
+    socket.send(JSON.stringify(msgBlock.toString()));
   });
   socket.addEventListener("close", (event) => {
     console.log(event.reason);

@@ -1,6 +1,8 @@
 {
+  "target": "ES2017",
+  "lib": ["ES2017", "DOM"],
   "compilerOptions": {
-    "module": "NodeNext",
+    "module": "nodenext",
     "strict": true,
     "noImplicitAny": true,
     "removeComments": true,
@@ -8,5 +10,5 @@
     "outDir": "dist/",
     "sourceMap": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "rollup.config.js"]
 }

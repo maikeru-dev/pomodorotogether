@@ -3,7 +3,7 @@ import {
   PomodoroEvent,
   PomodoroConfig,
   PomodoroState,
-} from "../common/interfaces";
+} from "../common/interfaces.js";
 
 export function formPomodoroState(currentTime: number, currentCycle: number) {
   return {
