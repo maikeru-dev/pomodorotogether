@@ -2,3 +2,4 @@ pnpm-lock.yaml
 dist/
 node_modules/
 public/assets/scripts/
+public/assets/styles/compiled.css

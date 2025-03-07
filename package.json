@@ -5,7 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "tsc && rollup -c rollup.config.js && node ./dist/index.js",
+    "start": "node --run build && node ./dist/index.js",
+    "dev": "multitail -cT ansi -l 'nodemon --config nodemon.json --run start' -cT ansi -L 'node --run css'",
+    "build": "tsc && rollup -c rollup.config.js",
+    "css": "npx postcss --verbose --poll -w public/assets/styles/style.css -o public/assets/styles/compiled.css",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,6 +17,7 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-typescript": "^12.1.2",
+    "@tailwindcss/postcss": "^4.0.11",
     "@types/body-parser": "^1.19.5",
     "@types/express": "^5.0.0",
     "@types/express-ws": "^3.0.5",
@@ -24,6 +28,9 @@
     "express": "^4.21.2",
     "express-ws": "^5.0.2",
     "nodemon": "^3.1.9",
+    "postcss": "^8.5.3",
+    "postcss-cli": "^11.0.0",
+    "tailwindcss": "^4.0.11",
     "tslib": "^2.8.1",
     "typescript": "^5.7.3",
     "ws": "^8.18.1"
