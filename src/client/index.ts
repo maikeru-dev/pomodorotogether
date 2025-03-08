@@ -3,17 +3,15 @@ import {
   PomoEvent,
   PomodoroConfig,
   PomodoroState,
-  PomoState,
 } from "../common/interfaces.js";
 import * as functions from "../common/functions.js";
 import { StyledPomoState } from "./styling.js";
 
-let currentState: PomoState;
+let currentState: StyledPomoState;
 let socket: WebSocket;
 
-function addListeners(socket: WebSocket, state: PomoState) {
-  let currentState: PomoState = state;
-
+function addListeners(socket: WebSocket, state: StyledPomoState) {
+  let currentState: StyledPomoState = state;
   socket.addEventListener("open", (event) => {
     console.log("Opened it!");
     let msgBlock = currentState.genMsgBlock();

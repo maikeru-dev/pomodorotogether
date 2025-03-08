@@ -80,8 +80,12 @@ export class StyledPomoState extends PomoState {
     this.initHook();
   }
   initHook(): void {
-    this.toggleStateBtn.addEventListener("click", this.toggleStateHook);
+    console.log("printing clock", this.coupledClock);
+    this.toggleStateBtn.addEventListener("click", () => {
+      this.toggleStateHook();
+    });
   }
+  printClock() {}
 
   private toggleStateHook() {
     let res = super.flipCurrentState();
