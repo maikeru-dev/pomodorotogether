@@ -46,6 +46,10 @@ export class PomoState {
     });
   }
 
+  getCurrentEvent() {
+    return this.currentEvent;
+  }
+
   flipCurrentState(): boolean {
     switch (this.currentEvent) {
       case PomoEvent.CONNECT:

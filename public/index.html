@@ -8,11 +8,19 @@
     <link rel="stylesheet" href="assets/styles/compiled.css" />
     <link rel="icon" href="assets/icons/favicon.ico" type="image/x-icon" />
   </head>
-  <body class="w-screen h-screen bg-linear-180 from-blue-500 to-cyan-400">
+  <body
+    style="transition: background 0.5 ease"
+    class="w-screen h-screen bg-linear-180 from-blue-500 to-cyan-400"
+  >
+    <div
+      id="overlay"
+      class="fixed pointer-events-none w-screen h-screen bg-linear-180 from-red-600 to-orange-400 opacity-visible opacity-0 transition-all duration-500"
+    ></div>
     <script src="assets/scripts/bundle.js"></script>
 
     <div
-      class="flex justify-between align-center items-center content-center flex-col"
+      style="right: 50%; left: 50%"
+      class="fixed flex z-10 justify-between align-center items-center content-center flex-col"
     >
       <div
         class="flex-row justify-center flex text-orange-web font-extrabold text-8xl"

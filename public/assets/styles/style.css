@@ -19,3 +19,8 @@
   user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 }
+
+.overlay-visible {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}

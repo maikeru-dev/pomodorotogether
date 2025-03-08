@@ -20,8 +20,10 @@ class CoupledClock {
   }
 
   startUpdateHandler(timeToGetTo: Date) {
+    console.log("Starting clock, wtf?");
     return new Promise<boolean>((resolve) => {
       this.intervalUpdateId = window.setInterval(() => {
+        console.log("Updating clock");
         let now = new Date();
         let diff = timeToGetTo.getTime() - now.getTime();
 
@@ -59,16 +61,20 @@ class CoupledClock {
     this.setClockSecond(Math.floor((time % 60000) / 1000));
   }
   private setClockMinute(minute: number) {
+    console.log("Setting clock minute", minute);
     this.clockMinute.value = minute.toString();
+    console.log("Set clock minute", this.clockMinute.value);
   }
   private setClockSecond(second: number) {
+    console.log("Setting clock second", second);
     this.clockSecond.value = second.toString();
+    console.log("Set clock second", this.clockSecond.value);
   }
 }
 
 export class StyledPomoState extends PomoState {
   toggleStateBtn: HTMLButtonElement;
-  background: HTMLElement = document.body;
+  background: HTMLElement = document.getElementById("overlay") as HTMLElement;
   coupledClock: CoupledClock;
 
   constructor(code: String) {
@@ -85,10 +91,10 @@ export class StyledPomoState extends PomoState {
       this.toggleStateHook();
     });
   }
-  printClock() {}
 
   private toggleStateHook() {
     let res = super.flipCurrentState();
+    console.log(res, super.getCurrentEvent());
     if (res) {
       this.updateBackground(this.currentEvent);
     }
@@ -108,18 +114,14 @@ export class StyledPomoState extends PomoState {
       if (res) {
         this.toggleStateHook();
       }
+
+      console.log("Clock stopped");
     });
   }
   private updateBackground(bool: PomoEvent) {
     let stopping = ["from-blue-500", "to-cyan-400"];
-    let starting = ["from-red-200", "to-yellow-500"];
+    let starting = ["from-red-600", "to-orange-400"];
 
-    if (bool === PomoEvent.STARTED) {
-      this.background.classList.add.apply(this.background, starting);
-      this.background.classList.remove.apply(this.background, stopping);
-    } else {
-      this.background.classList.add.apply(this.background, stopping);
-      this.background.classList.remove.apply(this.background, starting);
-    }
+    this.background.classList.toggle("overlay-visible");
   }
 }
