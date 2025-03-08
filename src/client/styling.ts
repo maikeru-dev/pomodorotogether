@@ -45,6 +45,27 @@ class CoupledClock {
     return new Date(now.getTime() + minutes * 60000 + seconds * 1000);
   }
 
+  isClockValid(): boolean {
+    if (
+      this.clockMinute.value.length != 2 ||
+      this.clockSecond.value.length != 2
+    ) {
+      return false;
+    }
+
+    let numMinute = parseInt(this.clockMinute.value, 10);
+    let numSecond = parseInt(this.clockSecond.value, 10);
+
+    if (Number.isNaN(numMinute) || Number.isNaN(numSecond)) {
+      return false;
+    }
+
+    if (numMinute < 0 || numMinute > 60 || numSecond < 0 || numSecond > 59) {
+      return false;
+    }
+
+    return true;
+  }
   isClockRunning() {
     return this.intervalUpdateId !== -1;
   }
@@ -81,8 +102,9 @@ export class StyledPomoState extends PomoState {
   }
   initHook(): void {
     this.toggleStateBtn.addEventListener("click", () => {
-      //TODO: Add Clock value checks here
-      this.toggleStateHook();
+      if (this.coupledClock.isClockValid()) {
+        this.toggleStateHook();
+      }
     });
   }
 
