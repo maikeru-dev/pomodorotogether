@@ -20,21 +20,18 @@ class CoupledClock {
   }
 
   startUpdateHandler(timeToGetTo: Date) {
-    console.log("Starting clock, wtf?");
     return new Promise<boolean>((resolve) => {
       this.intervalUpdateId = window.setInterval(() => {
-        console.log("Updating clock");
         let now = new Date();
         let diff = timeToGetTo.getTime() - now.getTime();
 
         if (diff <= 0 || this.intervalUpdateId === -1) {
-          window.clearInterval(this.intervalUpdateId);
-          this.intervalUpdateId = -1;
+          this.stopUpdateHandler();
           resolve(true);
         }
 
         this.setClock(diff);
-      }, 1000); // Assuming the interval is set to 1 second
+      }, 1100); // Assuming the interval is set to 1 second
 
       resolve(false);
     });
@@ -54,6 +51,7 @@ class CoupledClock {
 
   stopUpdateHandler() {
     window.clearInterval(this.intervalUpdateId);
+    this.intervalUpdateId = -1;
   }
 
   private setClock(time: number) {
@@ -61,14 +59,10 @@ class CoupledClock {
     this.setClockSecond(Math.floor((time % 60000) / 1000));
   }
   private setClockMinute(minute: number) {
-    console.log("Setting clock minute", minute);
-    this.clockMinute.value = minute.toString();
-    console.log("Set clock minute", this.clockMinute.value);
+    this.clockMinute.value = minute.toString().padStart(2, "0");
   }
   private setClockSecond(second: number) {
-    console.log("Setting clock second", second);
-    this.clockSecond.value = second.toString();
-    console.log("Set clock second", this.clockSecond.value);
+    this.clockSecond.value = second.toString().padStart(2, "0");
   }
 }
 
@@ -98,10 +92,8 @@ export class StyledPomoState extends PomoState {
     if (res) {
       this.updateBackground(this.currentEvent);
     }
-    console.log(this.coupledClock);
     if (this.currentEvent === PomoEvent.STARTED) {
-      console.log("Starting clock");
-      if (this.coupledClock.isClockRunning()) {
+      if (!this.coupledClock.isClockRunning()) {
         this.startClock();
       }
     } else {
@@ -114,8 +106,6 @@ export class StyledPomoState extends PomoState {
       if (res) {
         this.toggleStateHook();
       }
-
-      console.log("Clock stopped");
     });
   }
   private updateBackground(bool: PomoEvent) {
