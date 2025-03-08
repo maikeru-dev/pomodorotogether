@@ -12,10 +12,13 @@ let socket: WebSocket;
 
 function addListeners(socket: WebSocket, state: StyledPomoState) {
   let currentState: StyledPomoState = state;
+  let handler: Function;
+
   socket.addEventListener("open", (event) => {
+    handler = state.registerListener(sendMessage);
     console.log("Opened it!");
     let msgBlock = currentState.genMsgBlock();
-    console.log(JSON.stringify(msgBlock));
+    currentState.silentUpdate(PomoEvent.STOPPED);
     socket.send(JSON.stringify(msgBlock));
   });
   socket.addEventListener("close", (event) => {
@@ -24,7 +27,7 @@ function addListeners(socket: WebSocket, state: StyledPomoState) {
 
   socket.addEventListener("message", (event) => {
     let msgBlock: MessageBlock = JSON.parse(event.data);
-    currentState.setCurrentEvent(msgBlock.event);
+    currentState.excludedListenerUpdate(msgBlock.event, handler);
     console.log("Recieved", msgBlock);
   });
 }
@@ -35,6 +38,14 @@ if (document.readyState !== "loading") {
   document.addEventListener("DOMContentLoaded", function () {
     init();
   });
+}
+
+function sendMessage(state: StyledPomoState): void {
+  if (socket.readyState !== WebSocket.OPEN) {
+    return;
+  }
+
+  socket.send(JSON.stringify(state.genMsgBlock()));
 }
 
 function init() {

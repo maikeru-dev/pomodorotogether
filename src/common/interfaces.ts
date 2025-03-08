@@ -26,7 +26,7 @@ export interface MessageBlock {
 }
 
 export class PomoState {
-  currentEvent: PomoEvent = PomoEvent.STOPPED;
+  currentEvent: PomoEvent = PomoEvent.CONNECT;
   private static code: String;
   listeners: Function[] = [];
   constructor(code: String) {
@@ -37,13 +37,30 @@ export class PomoState {
     return PomoState.code;
   }
 
-  registerListener(handler: Function): void {
+  registerListener(handler: Function): Function {
     this.listeners.push(handler);
+    return handler;
   }
-  private broadcastUpdate(): void {
-    this.listeners.forEach(() => {
-      return this.currentEvent;
+  protected broadcastUpdate(): void {
+    this.listeners.forEach((listener) => {
+      return listener(this);
     });
+  }
+
+  protected noEchoBrodcast(excludeListener: Function): void {
+    this.listeners.forEach((listener) => {
+      console.log(listener);
+      if (listener.name !== excludeListener.name) {
+        listener(this);
+      }
+    });
+  }
+  silentUpdate(newEvent: PomoEvent): void {
+    this.currentEvent = newEvent;
+  }
+  excludedListenerUpdate(newEvent: PomoEvent, excludeListener: Function): void {
+    this.currentEvent = newEvent;
+    this.noEchoBrodcast(excludeListener);
   }
 
   getCurrentEvent() {
@@ -52,7 +69,6 @@ export class PomoState {
 
   flipCurrentState(): boolean {
     switch (this.currentEvent) {
-      case PomoEvent.CONNECT:
       case PomoEvent.STOPPED:
         this.setCurrentEvent(PomoEvent.STARTED);
         return true;
@@ -62,7 +78,13 @@ export class PomoState {
     }
     return false;
   }
-
+  processMessage(newEvent: PomoEvent): void {
+    if (newEvent === PomoEvent.CONNECT) {
+      // Do nothing
+      return;
+    }
+    this.setCurrentEvent(newEvent);
+  }
   setCurrentEvent(newEvent: PomoEvent) {
     this.currentEvent = newEvent;
     this.broadcastUpdate();

@@ -65,7 +65,7 @@ class CoupledClock {
       numMinute > 60 ||
       numSecond < 0 ||
       numSecond > 59 ||
-      (numMinute == 0 && numSecond == 0)
+      (numMinute == 0 && numSecond < 2) // my solution specific
     ) {
       return false;
     }
@@ -104,6 +104,7 @@ export class StyledPomoState extends PomoState {
       "toggleStateBtn",
     ) as HTMLButtonElement;
     this.coupledClock = new CoupledClock();
+    this.registerListener(this.clockHandler.bind(this));
     this.initHook();
   }
   initHook(): void {
@@ -114,21 +115,21 @@ export class StyledPomoState extends PomoState {
     });
   }
 
-  private toggleStateHook() {
+  private toggleStateHook(): void {
     let res = super.flipCurrentState();
-    console.log(res, super.getCurrentEvent());
-    if (res) {
+  }
+
+  private clockHandler(state: PomoState): void {
+    if (state.currentEvent === PomoEvent.STOPPED) {
+      this.coupledClock.stopUpdateHandler();
+      this.updateBackground(this.currentEvent);
+    } else if (state.currentEvent === PomoEvent.STARTED) {
+      this.startClock();
       this.updateBackground(this.currentEvent);
     }
-    if (this.currentEvent === PomoEvent.STARTED) {
-      if (!this.coupledClock.isClockRunning()) {
-        this.startClock();
-      }
-    } else {
-      this.coupledClock.stopUpdateHandler();
-    }
   }
-  private startClock() {
+
+  private startClock(): void {
     let time = this.coupledClock.getClockTime();
     this.coupledClock.startUpdateHandler(time).then((res) => {
       console.log("Clock has stopped", res);
