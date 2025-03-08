@@ -5,17 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>pomodorotogether</title>
-    <link rel="stylesheet" href="assets/styles/style.css" />
-    <link rel="stylesheet" href="assets/styles/normalize.css" />
+    <link rel="stylesheet" href="assets/styles/compiled.css" />
     <link rel="icon" href="assets/icons/favicon.ico" type="image/x-icon" />
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
   </head>
-  <body>
+  <body class="w-screen h-screen bg-linear-180 from-blue-500 to-cyan-400">
     <script src="assets/scripts/bundle.js"></script>
-    <header class="container top-heading orbitron-high">
-      <h1 id="header" class="text-l text-white">Pomodoro Together</h1>
-    </header>
 
-    <h1 class="text-3xl font-bold underline">Hello world!</h1>
+    <div
+      class="flex h-screen justify-between align-center items-center content-center flex-col"
+    >
+      <div class="text-orange-web dark:text-white">
+        <div
+          class="flex-row justify-end flex text-orange-web font-extrabold text-8xl"
+        >
+          <input
+            id="clock-minute"
+            style="max-width: 110px"
+            class="text-inherit max-w-min focus:outline-none disabled:text-red-800 active:border-none border-none text-end"
+            type="text"
+            value="20"
+          /><span class="select-none disabled:text-red-800 text-inherit"
+            >:</span
+          >
+          <input
+            id="clock-second"
+            style="max-width: 110px"
+            class="text-inherit max-w-min focus:outline-none disabled:text-red-800 active:border-none border-none text-start"
+            type="text"
+            value="00"
+          />
+        </div>
+      </div>
+    </div>
   </body>
 </html>
