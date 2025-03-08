@@ -1,4 +1,4 @@
-export enum PomodoroEvent {
+export enum PomoEvent {
   STOPPED,
   STARTED,
   LONG_STOP,
@@ -21,12 +21,12 @@ export interface PomodoroState {
 }
 
 export interface MessageBlock {
-  event: PomodoroEvent;
+  event: PomoEvent;
   code: String;
 }
 
 export class PomoState {
-  currentEvent: PomodoroEvent = PomodoroEvent.STOPPED;
+  currentEvent: PomoEvent = PomoEvent.STOPPED;
   private static code: String;
   listeners: Function[] = [];
   constructor(code: String) {
@@ -46,7 +46,20 @@ export class PomoState {
     });
   }
 
-  setCurrentEvent(newEvent: PomodoroEvent) {
+  flipCurrentState(): boolean {
+    switch (this.currentEvent) {
+      case PomoEvent.CONNECT:
+      case PomoEvent.STOPPED:
+        this.setCurrentEvent(PomoEvent.STARTED);
+        return true;
+      case PomoEvent.STARTED:
+        this.setCurrentEvent(PomoEvent.STOPPED);
+        return true;
+    }
+    return false;
+  }
+
+  setCurrentEvent(newEvent: PomoEvent) {
     this.currentEvent = newEvent;
     this.broadcastUpdate();
   }

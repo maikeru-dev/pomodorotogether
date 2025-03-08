@@ -1,6 +1,6 @@
 import {
   MessageBlock,
-  PomodoroEvent,
+  PomoEvent,
   PomodoroConfig,
   PomodoroState,
 } from "../common/interfaces.js";

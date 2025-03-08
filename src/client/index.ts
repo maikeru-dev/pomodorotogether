@@ -1,11 +1,12 @@
 import {
   MessageBlock,
-  PomodoroEvent,
+  PomoEvent,
   PomodoroConfig,
   PomodoroState,
   PomoState,
 } from "../common/interfaces.js";
 import * as functions from "../common/functions.js";
+import { StyledPomoState } from "./styling.js";
 
 let currentState: PomoState;
 let socket: WebSocket;
@@ -41,7 +42,7 @@ if (document.readyState !== "loading") {
 function init() {
   console.log("Running init!");
   let currentCode = window.location.pathname.slice(1);
-  currentState = new PomoState(currentCode);
+  currentState = new StyledPomoState(currentCode);
   if (currentCode != "") {
     socket = new WebSocket("ws://" + window.location.host + "/api/v1/");
     addListeners(socket, currentState);
