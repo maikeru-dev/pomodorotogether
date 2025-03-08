@@ -23,20 +23,20 @@ class CoupledClock {
     return new Promise<boolean>((resolve) => {
       this.intervalUpdateId = window.setInterval(() => {
         let now = new Date();
+        console.log(timeToGetTo.getTime(), now.getTime());
         let diff = timeToGetTo.getTime() - now.getTime();
 
-        if (diff <= 0 || this.intervalUpdateId === -1) {
-          this.stopUpdateHandler();
+        if (Math.trunc(diff / 1000) <= 0 || this.intervalUpdateId === -1) {
           resolve(true);
+          this.stopUpdateHandler();
         }
 
         this.setClock(diff);
       }, 1100); // Assuming the interval is set to 1 second
-
-      resolve(false);
     });
   }
 
+  // This gets the current time values out of the user clock
   getClockTime() {
     const now = new Date();
     const minutes = parseInt(this.clockMinute.value, 10);
@@ -80,8 +80,8 @@ export class StyledPomoState extends PomoState {
     this.initHook();
   }
   initHook(): void {
-    console.log("printing clock", this.coupledClock);
     this.toggleStateBtn.addEventListener("click", () => {
+      //TODO: Add Clock value checks here
       this.toggleStateHook();
     });
   }
@@ -103,15 +103,13 @@ export class StyledPomoState extends PomoState {
   private startClock() {
     let time = this.coupledClock.getClockTime();
     this.coupledClock.startUpdateHandler(time).then((res) => {
+      console.log("Clock has stopped", res);
       if (res) {
         this.toggleStateHook();
       }
     });
   }
   private updateBackground(bool: PomoEvent) {
-    let stopping = ["from-blue-500", "to-cyan-400"];
-    let starting = ["from-red-600", "to-orange-400"];
-
     this.background.classList.toggle("overlay-visible");
   }
 }
