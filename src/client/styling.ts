@@ -60,7 +60,13 @@ class CoupledClock {
       return false;
     }
 
-    if (numMinute < 0 || numMinute > 60 || numSecond < 0 || numSecond > 59) {
+    if (
+      numMinute < 0 ||
+      numMinute > 60 ||
+      numSecond < 0 ||
+      numSecond > 59 ||
+      (numMinute == 0 && numSecond == 0)
+    ) {
       return false;
     }
 
