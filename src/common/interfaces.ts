@@ -1,3 +1,5 @@
+import { WebSocket } from "ws";
+
 export enum PomoEvent {
   STOPPED,
   STARTED,
@@ -47,20 +49,29 @@ export class PomoState {
     });
   }
 
-  protected noEchoBrodcast(excludeListener: Function): void {
+  protected noEchoBrodcast(
+    msgBlock: MessageBlock,
+    excludeListener: Function,
+  ): void {
     this.listeners.forEach((listener) => {
       console.log(listener);
       if (listener.name !== excludeListener.name) {
-        listener(this);
+        listener(this, msgBlock);
       }
     });
   }
   silentUpdate(newEvent: PomoEvent): void {
     this.currentEvent = newEvent;
   }
-  excludedListenerUpdate(newEvent: PomoEvent, excludeListener: Function): void {
-    this.currentEvent = newEvent;
-    this.noEchoBrodcast(excludeListener);
+  excludedListenerUpdate(
+    msgBlock: MessageBlock,
+    excludeListener: Function,
+  ): void {
+    if (msgBlock.event === PomoEvent.CONNECT) {
+      // Do nothing
+      return;
+    }
+    this.noEchoBrodcast(msgBlock, excludeListener);
   }
 
   getCurrentEvent() {
@@ -92,5 +103,51 @@ export class PomoState {
 
   genMsgBlock(): MessageBlock {
     return { event: this.currentEvent, code: PomoState.code };
+  }
+}
+
+export class SocketWrapper {
+  private _socket: WebSocket;
+  private _admin: boolean = false;
+  private _code: string;
+  private _lastAdminConfig: MessageBlock | undefined;
+
+  constructor(socket: WebSocket) {
+    this._code = "";
+    this._socket = socket;
+    this._admin = false;
+    this._lastAdminConfig = undefined;
+  }
+
+  public verifyCode(code: string): boolean {
+    if (code === this._code) {
+      return true;
+    }
+    return false;
+  }
+  public set code(value: string) {
+    this._code = value;
+  }
+
+  public get code(): string {
+    return this._code;
+  }
+
+  public get socket(): WebSocket {
+    return this._socket;
+  }
+
+  public get admin(): boolean {
+    return this._admin;
+  }
+  public set admin(value: boolean) {
+    this._admin = value;
+  }
+
+  public get lastAdminConfig(): MessageBlock | undefined {
+    return this._lastAdminConfig;
+  }
+  public set lastAdminConfig(value: MessageBlock | undefined) {
+    this._lastAdminConfig = value;
   }
 }

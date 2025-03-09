@@ -2,7 +2,11 @@
 import { app } from "../lib/app/index.cjs";
 import express from "express";
 import expressWs from "express-ws";
-import { MessageBlock, PomoEvent } from "../common/interfaces.js";
+import {
+  MessageBlock,
+  PomoEvent,
+  SocketWrapper,
+} from "../common/interfaces.js";
 import { WebSocket } from "ws";
 import {
   Mutex,
@@ -15,13 +19,12 @@ import {
 expressWs(app);
 
 export const validCodes = new Set<string>();
-const passwordedClients: Map<string, Set<WebSocket>> = new Map();
+const passwordedClients: Map<string, Set<SocketWrapper>> = new Map();
 const router = express.Router();
 const mutex = new Mutex();
 
 router.ws("/", (ws, req) => {
-  let code: string = "";
-  let admin = false;
+  let upWS = new SocketWrapper(ws);
 
   ws.on("open", () => {
     console.log("New client connected");
@@ -29,53 +32,81 @@ router.ws("/", (ws, req) => {
 
   ws.on("message", (msg) => {
     let msgBlock = JSON.parse(msg.toString()) as MessageBlock;
-    let clients: Set<WebSocket> | undefined;
+    let clients: Set<SocketWrapper> | undefined;
 
     // Preprocess the message, auth only
-    if (code == "") {
-      code = msgBlock.code;
-      clients = passwordedClients.get(code);
+    if (upWS.code == "") {
+      upWS.code = msgBlock.code;
+      clients = passwordedClients.get(upWS.code);
+
       if (clients !== undefined) {
-        clients.add(ws);
+        let firstClient = clients.values().next()?.value;
+        upWS.admin = false;
+        upWS.lastAdminConfig = firstClient?.lastAdminConfig;
+        clients.add(upWS);
       } else {
-        // No clients yet, this is the admin ws connection.
-        admin = true;
-        clients = new Set([ws]);
-        passwordedClients.set(code, clients);
+        upWS.admin = true;
+        upWS.lastAdminConfig = {
+          event: PomoEvent.SYNC_CONFIG,
+          code: upWS.code,
+          clockInfo: msgBlock.clockInfo,
+        };
+        clients = new Set([upWS]);
+        passwordedClients.set(upWS.code, clients);
       }
     }
 
-    clients = passwordedClients.get(code)!;
+    clients = passwordedClients.get(upWS.code)!;
     let firstClient = clients.values().next()?.value;
-    if (!admin) {
-      if (firstClient === ws) {
-        admin = true;
+
+    // Ensure the code is correct
+    if (upWS.code !== msgBlock.code) {
+      console.error("Code mismatch: Have ", upWS.code, ", Got", msgBlock.code);
+      ws.close();
+    }
+
+    // Upgrading the first client to admin
+    if (!upWS.admin) {
+      if (firstClient === upWS) {
+        upWS.admin = true;
       }
     }
 
-    if (!admin) {
-      msgBlock.clockInfo = undefined;
-    }
+    if (upWS.admin) {
+      // If the clock info has changed, update the last admin config
+      if (upWS.lastAdminConfig!.clockInfo != msgBlock?.clockInfo) {
+        upWS.lastAdminConfig!.clockInfo = msgBlock.clockInfo;
 
-    if (code !== msgBlock.code) {
-      console.error("Code mismatch: Have ", code, ", Got", msgBlock.code);
-      ws.close();
+        // Then send the new config to all clients
+        clients?.forEach((client) => {
+          if (client != upWS) {
+            client.socket.send(JSON.stringify(upWS.lastAdminConfig));
+          }
+        });
+      }
+    } else {
+      // If non-admin client has a different clock info, send a rewrite
+      if (firstClient?.lastAdminConfig?.clockInfo != msgBlock?.clockInfo) {
+        msgBlock.clockInfo = undefined;
+        console.log("Sending rewrite", upWS.lastAdminConfig);
+        ws.send(JSON.stringify(upWS.lastAdminConfig));
+      }
     }
 
     // Send the message to all clients, except this one.
     clients?.forEach((client) => {
-      if (client != ws) {
-        client.send(msg);
+      if (client != upWS) {
+        client.socket.send(msg);
       }
     });
   });
   ws.on("close", () => {
-    if (code != "") {
-      let clients = passwordedClients.get(code);
+    if (upWS.code != "") {
+      let clients = passwordedClients.get(upWS.code);
       if (clients != undefined) {
-        clients.delete(ws);
+        clients.delete(upWS);
         if (clients.size == 0) {
-          passwordedClients.delete(code);
+          passwordedClients.delete(upWS.code);
         }
       }
     }
