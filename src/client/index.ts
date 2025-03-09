@@ -2,7 +2,6 @@ import {
   MessageBlock,
   PomoEvent,
   PomodoroConfig,
-  PomodoroState,
 } from "../common/interfaces.js";
 import * as functions from "../common/functions.js";
 import { StyledPomoState } from "./styling.js";

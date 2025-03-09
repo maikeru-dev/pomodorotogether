@@ -2,7 +2,7 @@
 import { app } from "../lib/app/index.cjs";
 import express from "express";
 import expressWs from "express-ws";
-import { MessageBlock } from "../common/interfaces.js";
+import { MessageBlock, PomoEvent } from "../common/interfaces.js";
 import { WebSocket } from "ws";
 import {
   Mutex,
@@ -14,38 +14,56 @@ import {
 
 expressWs(app);
 
-export const validCodes = new Set<String>();
-const passwordedClients: Map<String, Set<WebSocket>> = new Map();
+export const validCodes = new Set<string>();
+const passwordedClients: Map<string, Set<WebSocket>> = new Map();
 const router = express.Router();
 const mutex = new Mutex();
 
 router.ws("/", (ws, req) => {
-  let code: String = "";
+  let code: string = "";
+  let admin = false;
+
   ws.on("open", () => {
     console.log("New client connected");
   });
+
   ws.on("message", (msg) => {
     let msgBlock = JSON.parse(msg.toString()) as MessageBlock;
-    let clients;
+    let clients: Set<WebSocket> | undefined;
+
+    // Preprocess the message, auth only
     if (code == "") {
       code = msgBlock.code;
       clients = passwordedClients.get(code);
-      if (clients != undefined) {
+      if (clients !== undefined) {
         clients.add(ws);
       } else {
+        // No clients yet, this is the admin ws connection.
+        admin = true;
         clients = new Set([ws]);
         passwordedClients.set(code, clients);
       }
-    } else {
-      clients = passwordedClients.get(code);
     }
 
-    if (code != msgBlock.code) {
+    clients = passwordedClients.get(code)!;
+    let firstClient = clients.values().next()?.value;
+    if (!admin) {
+      if (firstClient === ws) {
+        admin = true;
+      }
+    }
+
+    if (!admin) {
+      msgBlock.clockInfo = undefined;
+    }
+
+    if (code !== msgBlock.code) {
       console.error("Code mismatch: Have ", code, ", Got", msgBlock.code);
       ws.close();
     }
 
-    clients!.forEach((client) => {
+    // Send the message to all clients, except this one.
+    clients?.forEach((client) => {
       if (client != ws) {
         client.send(msg);
       }

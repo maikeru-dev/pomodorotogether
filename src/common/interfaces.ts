@@ -12,28 +12,28 @@ export interface PomodoroConfig {
   breakTime: number;
   extendedBreakTime: number;
   cycleCount: number;
-  secret: string;
 }
 
-export interface PomodoroState {
+export interface ClockInfo {
   currentTime: number;
   currentCycle: number;
 }
 
 export interface MessageBlock {
   event: PomoEvent;
-  code: String;
+  clockInfo?: ClockInfo;
+  code: string;
 }
 
 export class PomoState {
   currentEvent: PomoEvent = PomoEvent.CONNECT;
-  private static code: String;
+  private static code: string;
   listeners: Function[] = [];
-  constructor(code: String) {
+  constructor(code: string) {
     PomoState.code = code;
   }
 
-  getCode(): String {
+  getCode(): string {
     return PomoState.code;
   }
 

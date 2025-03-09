@@ -2,12 +2,8 @@ import { PomoEvent, PomoState } from "../common/interfaces.js";
 // WARN: Client only code
 
 class CoupledClock {
-  protected clockMinute = document.getElementById(
-    "clock-minute",
-  ) as HTMLInputElement;
-  protected clockSecond = document.getElementById(
-    "clock-second",
-  ) as HTMLInputElement;
+  protected clockMinute: HTMLInputElement;
+  protected clockSecond: HTMLInputElement;
   protected intervalUpdateId: number = -1;
 
   constructor() {
@@ -98,7 +94,7 @@ export class StyledPomoState extends PomoState {
   background: HTMLElement = document.getElementById("overlay") as HTMLElement;
   coupledClock: CoupledClock;
 
-  constructor(code: String) {
+  constructor(code: string) {
     super(code);
     this.toggleStateBtn = document.getElementById(
       "toggleStateBtn",
